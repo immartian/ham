@@ -1,0 +1,139 @@
+# HAM Configuration for Iran Censorship Testing
+# Based on real-world observations of Iranian internet filtering
+
+ham:
+  region: "iran"
+  description: "Configuration tailored for Iranian internet censorship patterns"
+  
+  scanning:
+    interval: 3s
+    timeout: 10s  # Longer timeout due to throttling
+    retries: 2
+    parallel_tests: 5  # Reduced to avoid triggering rate limits
+    
+  protocols:
+    quic:
+      enabled: true
+      description: "QUIC disabled on most foreign ranges, port-sensitive"
+      test_cases:
+        - name: "QUIC on 443 (blocked)"
+          port: 443
+          expected_result: "blocked"
+          test_domains: ["google.com", "cloudflare.com"]
+        - name: "QUIC on 80 (may work)"
+          port: 80
+          expected_result: "limited"
+          test_domains: ["google.com", "cloudflare.com"]
+        - name: "QUIC on 8080 (alternative)"
+          port: 8080
+          expected_result: "limited"
+          test_domains: ["google.com", "cloudflare.com"]
+      
+    udp:
+      enabled: true
+      description: "Upload limited to 1-2 Mbps, improving but not good yet"
+      test_cases:
+        - name: "UDP connectivity"
+          ports: [53, 123, 1194]
+          upload_limit_test: true
+          expected_upload_limit: 2_000_000  # 2 Mbps in bytes
+          test_endpoints: ["8.8.8.8", "1.1.1.1"]
+        - name: "UDP packet size sensitivity"
+          test_sizes: [64, 512, 1024, 1500]
+          expected_behavior: "degradation_with_size"
+          
+    ipv6:
+      enabled: false
+      description: "Disabled nationwide"
+      test_cases:
+        - name: "IPv6 connectivity"
+          expected_result: "blocked"
+          test_addresses: ["2001:4860:4860::8888", "2606:4700:4700::1111"]
+          
+    icmp:
+      enabled: true
+      description: "Improving but blocks many ranges after 2-3 pings"
+      test_cases:
+        - name: "ICMP rate limiting"
+          ping_count: 5
+          expected_behavior: "first_few_succeed_then_block"
+          test_targets: ["8.8.8.8", "1.1.1.1", "208.67.222.222"]
+        - name: "ICMP range blocking"
+          test_ranges: 
+            - "google_dns"
+            - "cloudflare_dns" 
+            - "iranian_domestic"
+          expected_pattern: "foreign_blocked_domestic_ok"
+          
+    tls:
+      enabled: true
+      description: "Better for normal websites, blocked on VPN tunnels, fragmentation works"
+      test_cases:
+        - name: "Normal website TLS"
+          test_sites: ["google.com", "github.com", "stackoverflow.com"]
+          expected_result: "good"
+        - name: "VPN tunnel detection"
+          test_vpn_patterns: true
+          openvpn_handshake: "blocked"
+          wireguard_handshake: "blocked"
+        - name: "TLS fragmentation bypass"
+          fragmentation_enabled: true
+          fragment_sizes: [64, 128, 256]
+          expected_result: "bypass_successful"
+          
+  heuristics:
+    iran_specific_patterns:
+      # DPI signatures specific to Iranian filtering
+      dpi_signatures:
+        - "tls_sni_reset"  # SNI-based blocking
+        - "udp_upload_throttle"  # Upload bandwidth limiting
+        - "icmp_rate_limit"  # ICMP rate limiting after N packets
+        - "quic_port_sensitivity"  # QUIC blocked on specific ports
+        - "vpn_tunnel_detection"  # VPN protocol fingerprinting
+        
+      censorship_confidence_rules:
+        - condition: "ipv6_completely_blocked"
+          confidence_boost: 0.9
+        - condition: "udp_upload_limited_and_icmp_rate_limited"
+          confidence_boost: 0.8
+        - condition: "quic_443_blocked_but_alt_ports_work"
+          confidence_boost: 0.7
+        - condition: "tls_fragmentation_bypasses_blocks"
+          confidence_boost: 0.9
+          
+  analysis:
+    iran_specific_tests:
+      data_center_isolation:
+        enabled: true
+        description: "Test if running from Iranian DC without foreign access"
+        test_method: "trace_route_analysis"
+        
+      upload_bandwidth_profiling:
+        enabled: true
+        test_sizes: [100_000, 500_000, 1_000_000, 2_000_000]  # bytes
+        expected_throttle_point: 2_000_000  # 2MB/s
+        
+      icmp_progressive_blocking:
+        enabled: true
+        ping_sequence: [1, 2, 3, 4, 5, 10]
+        expected_block_after: 3
+        
+      quic_port_matrix:
+        enabled: true
+        test_ports: [80, 443, 8080, 8443, 9090]
+        expected_blocked: [443]
+        expected_limited: [80, 8080]
+        
+      tls_fragmentation_effectiveness:
+        enabled: true
+        fragment_sizes: [32, 64, 128, 256, 512]
+        test_blocked_sites: ["telegram.org", "signal.org"]
+        
+  reporting:
+    iran_specific_metrics:
+      - "ipv6_availability_percentage"
+      - "udp_upload_bandwidth_limit"
+      - "icmp_blocking_threshold" 
+      - "quic_port_success_matrix"
+      - "tls_fragmentation_success_rate"
+      - "vpn_detection_accuracy"
