@@ -252,7 +252,7 @@ ham analyze --depth=deep --config=./analysis.yaml
 
 **Network Layer Analysis:**
 ```
-📊 Network Interface Status:
+Network Interface Status:
    ✓ Default route found (via 192.168.1.1)
    ✓ IPv4 connectivity: Excellent
    ⚠ IPv6 connectivity: Disabled (policy-based)
@@ -261,28 +261,28 @@ ham analyze --depth=deep --config=./analysis.yaml
 
 **Protocol Correlation Analysis:**
 ```
-🔍 Cross-Protocol Correlation:
-   📈 TCP success rate: 85% (good)
-   📉 UDP success rate: 45% (suspicious - possible DPI)
-   🎯 DNS consistency: 98% (reliable)
+Cross-Protocol Correlation:
+   TCP success rate: 85% (good)
+   UDP success rate: 45% (suspicious - possible DPI)
+   DNS consistency: 98% (reliable)
    ⚠ TLS handshake patterns: SNI filtering detected
 ```
 
 **Censorship Pattern Detection:**
 ```
-🛡️ Censorship Analysis:
-   🚨 DPI Signatures Detected:
+Censorship Analysis:
+   DPI Signatures Detected:
       - TLS ClientHello resets on specific domains
       - UDP packet drops above 1KB payload
       - DNS response TTL manipulation detected
    
-   📊 Confidence Matrix:
+   Confidence Matrix:
       DNS Poisoning:      15% (low)
       Bandwidth Limiting: 75% (high) 
       Protocol Blocking:  90% (very high)
       Geographic Blocking: 25% (low)
 
-   💡 Recommended Actions:
+   Recommended Actions:
       1. Use TLS fragmentation (success probability: 85%)
       2. Switch to DoH/DoT for DNS (success probability: 70%)
       3. Consider QUIC alternatives (success probability: 20%)
@@ -290,7 +290,7 @@ ham analyze --depth=deep --config=./analysis.yaml
 
 **Reasoning Chain:**
 ```
-🧠 Analysis Reasoning:
+Analysis Reasoning:
    1. TCP:443 works but shows connection resets → SNI filtering
    2. UDP severely degraded vs TCP → DPI targeting UDP
    3. DNS resolvers show consistent responses → no DNS poisoning
@@ -536,21 +536,21 @@ ham/
 
 ## Development Roadmap
 
-### Phase 1: Foundation (✅ Completed)
+### Phase 1: Foundation (Completed)
 - [x] **Core Architecture**: Modular design with async support
 - [x] **Basic Protocols**: TCP, DNS, HTTPS, UDP testing
 - [x] **Terminal UI**: Real-time scanning interface with progress bars
 - [x] **Configuration System**: Structured configuration management
 - [x] **Heuristic Analysis**: Basic censorship detection and reasoning
 
-### Phase 2: Intelligence (📋 Next)  
+### Phase 2: Intelligence (Next)  
 - [ ] **Advanced Heuristics**: Pattern recognition and correlation analysis
 - [ ] **Plugin System**: Dynamic protocol and analyzer loading
 - [ ] **Temporal Analysis**: Time-series censorship tracking
 - [ ] **Confidence Scoring**: Probabilistic result assessment
 - [ ] **Configuration Files**: YAML-based external configuration
 
-### Phase 3: Circumvention (🔮 Future)
+### Phase 3: Circumvention (Future)
 - [ ] **Tunnel Integration**: Automatic circumvention tool orchestration
 - [ ] **Success Prediction**: Effectiveness estimation for different methods
 - [ ] **QR Code Export**: Mobile-friendly bridge sharing
